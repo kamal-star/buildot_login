@@ -1,0 +1,515 @@
+{% extends "templates/base.html" %}
+{#
+	BuildOT One login page.
+
+	Only the look changes: the behaviour is Frappe's own login.js (included from
+	frappe/ explicitly, so another theme's copy can't replace it). It drives the
+	page through these hooks, which must stay:
+	  section.for-login / .for-forgot / .for-signup / .for-login-with-email-link,
+	  form.form-login / .form-forgot, #login_email, #login_password, #forgot_email,
+	  .btn-primary inside each section, and .login-content (2FA renders into it).
+#}
+
+{% block title %}BuildOT One{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="/assets/buildot_login/css/buildot_login.css?v={{ bo_version }}">
+{% endblock %}
+
+{% block banner %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<svg class="bo-sprite" aria-hidden="true">
+	<symbol id="bo-wifi" viewBox="0 0 24 24"><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.859a10 10 0 0 1 14 0"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/></symbol>
+	<symbol id="bo-brain" viewBox="0 0 24 24"><path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/></symbol>
+	<symbol id="bo-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+	<symbol id="bo-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+	<symbol id="bo-wind" viewBox="0 0 24 24"><path d="M12.8 19.6A2 2 0 1 0 14 16H2"/><path d="M17.5 8a2.5 2.5 0 1 1 2 4H2"/><path d="M9.8 4.4A2 2 0 1 1 11 8H2"/></symbol>
+	<symbol id="bo-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+	<symbol id="bo-thermometer" viewBox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></symbol>
+	<symbol id="bo-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></symbol>
+	<symbol id="bo-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+	<symbol id="bo-leaf" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></symbol>
+	<symbol id="bo-activity" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></symbol>
+	<symbol id="bo-cpu" viewBox="0 0 24 24"><path d="M12 20v2"/><path d="M12 2v2"/><path d="M17 20v2"/><path d="M17 2v2"/><path d="M2 12h2"/><path d="M2 17h2"/><path d="M2 7h2"/><path d="M20 12h2"/><path d="M20 17h2"/><path d="M20 7h2"/><path d="M7 20v2"/><path d="M7 2v2"/><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="8" y="8" width="8" height="8" rx="1"/></symbol>
+	<symbol id="bo-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></symbol>
+	<symbol id="bo-eye-off" viewBox="0 0 24 24"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></symbol>
+	<symbol id="bo-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+	<symbol id="bo-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+	<symbol id="bo-loader" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></symbol>
+	<symbol id="bo-network" viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></symbol>
+</svg>
+
+{%- set orbit = [
+	("wifi", "#5EC1AC"), ("brain", "#7DEBD9"), ("layers", "#3FA28C"),
+	("gauge", "#5EC1AC"), ("wind", "#7DEBD9")] -%}
+{%- set steps = ["Sense", "Understand", "Reason", "Act", "Verify", "Learn"] -%}
+{%- set modules = [
+	("wifi", "IoT", "#5EC1AC"), ("zap", "Energy", "#F5C542"),
+	("thermometer", "Climate", "#7DEBD9"), ("wrench", "Maintenance", "#E8875B"),
+	("shield-check", "Compliance", "#A78BFA"), ("leaf", "ESG", "#5EC1AC"),
+	("activity", "Wellbeing", "#F472B6")] -%}
+{%- set logo_url = "/assets/buildot_login/images/buildot-symbol.png" -%}
+
+<div id="bo" class="bo">
+	<!-- ===== Left: brand / animated story (desktop only) ===== -->
+	<aside class="bo-left" aria-hidden="true">
+		<div class="bo-left-bg"></div>
+		<div class="bo-left-glow1"></div>
+		<div class="bo-left-glow2"></div>
+
+		<svg class="bo-hex" viewBox="0 0 500 400" preserveAspectRatio="xMidYMid slice">
+			{%- for n in range(24) %}
+			{%- set i = n // 6 %}{%- set o = n % 6 %}{%- set delay = (o + i) * 0.4 %}
+			<polygon points="30,0 60,17.3 60,52 30,69.3 0,52 0,17.3"
+				transform="translate({{ o * 80 + (40 if i % 2 == 1 else 0) }}, {{ i * 70 }})"
+				opacity="{{ 0.03 + ((n * 7 + 3) % 10) * 0.006 }}"
+				style="animation: bo-hex-pulse {{ 6 + delay }}s ease-in-out infinite; animation-delay: {{ delay }}s"/>
+			{%- endfor %}
+		</svg>
+
+		<svg class="bo-lines" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+			<defs>
+				<linearGradient id="boLineGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+					<stop offset="0%" stop-color="#5EC1AC" stop-opacity="0"/>
+					<stop offset="50%" stop-color="#5EC1AC" stop-opacity="0.3"/>
+					<stop offset="100%" stop-color="#5EC1AC" stop-opacity="0"/>
+				</linearGradient>
+				<linearGradient id="boLineGrad2" x1="0%" y1="100%" x2="100%" y2="0%">
+					<stop offset="0%" stop-color="#7DEBD9" stop-opacity="0"/>
+					<stop offset="50%" stop-color="#7DEBD9" stop-opacity="0.2"/>
+					<stop offset="100%" stop-color="#7DEBD9" stop-opacity="0"/>
+				</linearGradient>
+			</defs>
+			<path d="M100 100 Q300 200 200 400 T400 700" stroke="url(#boLineGrad1)" stroke-width="1" class="bo-dash-1"/>
+			<path d="M500 50 Q200 300 350 500 T150 750" stroke="url(#boLineGrad2)" stroke-width="1" class="bo-dash-2"/>
+			<path d="M50 400 Q250 350 300 200 T550 300" stroke="url(#boLineGrad1)" stroke-width="0.5" class="bo-dash-3"/>
+		</svg>
+
+		<div class="bo-left-inner">
+			<div class="bo-brand">
+				<img src="{{ logo_url }}" alt="BuildOT" class="bo-brand-logo">
+				<div class="bo-brand-text">
+					<div class="bo-brand-name"><span>BuildOT</span><span class="bo-teal">One</span></div>
+					<p class="bo-brand-tag">The Super Building App</p>
+				</div>
+			</div>
+
+			<div class="bo-story">
+				<div class="bo-orbit">
+					<div class="bo-orbit-ring1"></div>
+					<div class="bo-orbit-ring2"></div>
+					<div class="bo-orbit-core"><svg class="bo-i bo-i-core"><use href="#bo-cpu"/></svg></div>
+					{%- for o in orbit %}
+					<div class="bo-orbit-item" style="animation: bo-orbit {{ 18 + loop.index0 * 3 }}s linear infinite; animation-delay: {{ loop.index0 * -3.6 }}s">
+						<div class="bo-orbit-chip"><svg class="bo-i" style="color: {{ o[1] }}"><use href="#bo-{{ o[0] }}"/></svg></div>
+					</div>
+					{%- endfor %}
+				</div>
+
+				<div class="bo-headline">
+					<h2>Where Buildings <span class="bo-grad1">Think</span>.<br>Where Intelligence <span class="bo-grad2">Acts</span>.</h2>
+					<p>One platform for IoT monitoring, intelligent operations, sustainability tracking, and AI-driven building optimization.</p>
+				</div>
+
+				<div class="bo-steps" id="boSteps">
+					{%- for s in steps %}
+					<div class="bo-step-wrap">
+						<div class="bo-step{% if loop.first %} on{% endif %}">{{ s }}</div>
+						{%- if not loop.last %}<div class="bo-step-line"></div>{% endif %}
+					</div>
+					{%- endfor %}
+				</div>
+			</div>
+
+			<div class="bo-bottom">
+				<div class="bo-modules">
+					<div class="bo-modules-box">
+						<svg class="bo-sweep" preserveAspectRatio="none">
+							<defs>
+								<linearGradient id="boPulseLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+									<stop offset="0%" stop-color="#5EC1AC" stop-opacity="0"/>
+									<stop offset="50%" stop-color="#5EC1AC" stop-opacity="0.4"/>
+									<stop offset="100%" stop-color="#5EC1AC" stop-opacity="0"/>
+								</linearGradient>
+							</defs>
+							<line x1="0" y1="50%" x2="100%" y2="50%" stroke="url(#boPulseLineGrad)" stroke-width="1" class="bo-sweep-line"/>
+						</svg>
+						<div class="bo-mod-row" id="boModules">
+							{%- for m in modules %}
+							<div class="bo-mod{% if loop.first %} on{% endif %}" style="--c: {{ m[2] }}">
+								{%- if not loop.first %}<div class="bo-mod-link"></div>{% endif %}
+								<div class="bo-mod-ico"><svg class="bo-i"><use href="#bo-{{ m[0] }}"/></svg></div>
+								<span class="bo-mod-label">{{ m[1] }}</span>
+								<div class="bo-mod-dot"></div>
+							</div>
+							{%- endfor %}
+						</div>
+					</div>
+					<p class="bo-mod-caption"><span class="bo-mod-count">7 modules</span><span class="bo-sep">·</span>One Operating System<span class="bo-sep">·</span>Closed-loop Intelligence</p>
+				</div>
+				<div class="bo-status">
+					<div class="bo-status-ok"><div class="bo-pulse-dot"></div><span>All systems operational</span></div>
+					<div class="bo-status-div"></div>
+					<span>Powered by MachineSens IoT</span>
+				</div>
+			</div>
+		</div>
+	</aside>
+
+	<!-- ===== Right: sign in ===== -->
+	<main class="bo-right">
+		<div class="bo-right-bg"></div>
+		<div class="bo-right-glow"></div>
+
+		<div class="bo-right-inner">
+			<div class="bo-panel">
+				<div class="bo-mobile-brand">
+					<img src="{{ logo_url }}" alt="BuildOT">
+					<h1>BuildOT <span class="bo-teal">One</span></h1>
+					<p>The Super Building App</p>
+				</div>
+
+				<noscript>
+					<div class="bo-alert error" style="display:flex">
+						<span class="bo-alert-x">×</span>
+						<span>{{ _("Javascript is disabled on your browser") }}</span>
+					</div>
+				</noscript>
+
+				<section class="for-login">
+					<div class="bo-heading">
+						<h2>Welcome back</h2>
+						<p>Sign in to your building command center</p>
+					</div>
+
+					<div class="bo-alert" role="alert"><span class="bo-alert-x">×</span><span class="bo-alert-msg"></span></div>
+
+					<div class="login-content page-card">
+						<form class="form-signin form-login" role="form" autocomplete="on">
+							{%- if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
+							<div class="bo-field">
+								<label for="login_email" class="bo-label">Username</label>
+								<div class="bo-input-wrap">
+									<input type="text" id="login_email" class="bo-input" placeholder="Enter your username"
+										required autofocus autocomplete="username" spellcheck="false">
+									<div class="bo-input-glow"></div>
+								</div>
+							</div>
+
+							<div class="bo-field">
+								<div class="bo-label-row">
+									<label for="login_password" class="bo-label">Password</label>
+									{%- if not disable_user_pass_login %}
+									<a href="#forgot" class="bo-forgot-link">Forgot password?</a>
+									{%- endif %}
+								</div>
+								<div class="bo-input-wrap">
+									<input type="password" id="login_password" class="bo-input bo-input-pw" placeholder="Enter your password"
+										required autocomplete="current-password">
+									<button type="button" class="bo-eye" aria-label="Show password">
+										<svg class="bo-i bo-i-eye"><use href="#bo-eye"/></svg>
+									</button>
+									<div class="bo-input-glow"></div>
+								</div>
+							</div>
+
+							<label class="bo-remember">
+								<input type="checkbox" id="bo_remember" class="bo-sr-only" aria-label="Remember me">
+								<span class="bo-check"><svg class="bo-i"><use href="#bo-check"/></svg></span>
+								<span class="bo-remember-text">Remember me</span>
+							</label>
+							{%- endif %}
+
+							{%- if not disable_user_pass_login %}
+							<button type="submit" class="btn-primary btn-login bo-submit">
+								<span class="bo-submit-shimmer"></span>
+								<span class="bo-submit-hover"></span>
+								<span class="bo-submit-content">
+									<span class="bo-submit-label">Sign in to Platform</span>
+									<svg class="bo-i bo-i-arrow"><use href="#bo-arrow-right"/></svg>
+								</span>
+							</button>
+							{%- endif %}
+
+							{%- if ldap_settings and ldap_settings.enabled %}
+							<button type="button" class="bo-alt-btn btn-ldap-login {{ 'btn-primary' if disable_user_pass_login else '' }}">{{ _("Login with LDAP") }}</button>
+							{%- endif %}
+						</form>
+
+						{%- if social_login or login_with_email_link or login_with_frappe_cloud_url %}
+						<div class="bo-alt">
+							<div class="bo-or"><span>{{ _("or") }}</span></div>
+							{%- for provider in provider_logins %}
+							<a href="{{ provider.auth_url }}" class="bo-alt-btn btn-login-option btn-{{ provider.name }}">
+								{%- if provider.icon %}{{ provider.icon }}{% endif %}
+								{{ _("Login with {0}").format(provider.provider_name) }}
+							</a>
+							{%- endfor %}
+							{%- if login_with_frappe_cloud_url %}
+							<a href="{{ login_with_frappe_cloud_url }}" class="bo-alt-btn btn-login-option">{{ _("Login with Frappe Cloud") }}</a>
+							{%- endif %}
+							{%- if login_with_email_link %}
+							<a href="#login-with-email-link" class="bo-alt-btn btn-login-option">{{ _("Login with Email Link") }}</a>
+							{%- endif %}
+						</div>
+						{%- endif %}
+					</div>
+
+					<div class="bo-trust">
+						<div class="bo-badges">
+							{%- for b in ["ISO 27001", "SOC 2", "GDPR", "WELL", "LEED"] %}<div class="bo-badge">{{ b }}</div>{% endfor %}
+						</div>
+						<div class="bo-links">
+							<span>Privacy Policy</span><span class="bo-sep">·</span><span>Terms of Service</span><span class="bo-sep">·</span><span>Support</span>
+						</div>
+					</div>
+				</section>
+
+				{%- if login_with_email_link %}
+				<section class="for-login-with-email-link" style="display:none">
+					<div class="bo-heading">
+						<h2>{{ _("Login with Email Link") }}</h2>
+						<p>{{ _("We will email you a link to sign in.") }}</p>
+					</div>
+					<div class="bo-alert" role="alert"><span class="bo-alert-x">×</span><span class="bo-alert-msg"></span></div>
+					<div class="login-content page-card">
+						<form class="form-signin form-login-with-email-link hide" role="form">
+							<div class="bo-field">
+								<label for="login_with_email_link_email" class="bo-label">{{ _("Email") }}</label>
+								<div class="bo-input-wrap">
+									<input type="email" id="login_with_email_link_email" class="bo-input" placeholder="{{ _('Email Address') }}" required autocomplete="username">
+									<div class="bo-input-glow"></div>
+								</div>
+							</div>
+							<button type="submit" class="btn-primary btn-login-with-email-link bo-submit">
+								<span class="bo-submit-hover"></span>
+								<span class="bo-submit-content"><span class="bo-submit-label">{{ _("Send login link") }}</span></span>
+							</button>
+							<a href="#login" class="bo-back">{{ _("Back to Login") }}</a>
+						</form>
+					</div>
+				</section>
+				{%- endif %}
+
+				<section class="for-signup" style="display:none">
+					<div class="bo-heading">
+						<h2>{{ _("Create an account") }}</h2>
+						<p>{{ _("Signups have been disabled for this website.") if disable_signup else "" }}</p>
+					</div>
+					<div class="bo-alert" role="alert"><span class="bo-alert-x">×</span><span class="bo-alert-msg"></span></div>
+					<div class="login-content page-card bo-generic">
+						{%- if not disable_signup %}{{ signup_form_template }}{% endif %}
+						<a href="#login" class="bo-back">{{ _("Back to Login") }}</a>
+					</div>
+				</section>
+			</div>
+		</div>
+
+		<div class="bo-security">
+			<svg class="bo-i"><use href="#bo-network"/></svg>
+			<span>Enterprise-grade security · End-to-end encrypted · 99.97% uptime SLA</span>
+		</div>
+	</main>
+
+	<!-- ===== Forgot password (modal) ===== -->
+	<section class="for-forgot" style="display:none">
+		<div class="bo-modal" data-bo-close>
+			<div class="bo-modal-card login-content page-card">
+				<form class="form-signin form-forgot hide" role="form">
+					<h3>Reset Password</h3>
+					<p class="bo-modal-sub">Enter your username or email to receive a password reset link.</p>
+					<p class="bo-modal-msg ok"></p>
+					<p class="bo-modal-msg error"></p>
+					<input type="text" id="forgot_email" class="bo-input bo-modal-input" placeholder="Username or email" required autocomplete="username">
+					<div class="bo-modal-actions">
+						<a href="#login" class="bo-btn-cancel">Cancel</a>
+						<button type="submit" class="btn-primary btn-forgot bo-btn-send">
+							<svg class="bo-i bo-spin"><use href="#bo-loader"/></svg>
+							<span class="bo-send-label">Send Reset Link</span>
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</section>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>{% include "frappe/templates/includes/login/login.js" %}</script>
+<script>
+// BuildOT look on top of Frappe's login.js: status messages, the forgot-password
+// modal, remember-me, the password eye and the left panel's animations.
+(function () {
+	var T = {
+		verifying: {{ _("Verifying...") | tojson }},
+		emailed: {{ _("Instructions Emailed") | tojson }},
+	};
+	var REMEMBER = "buildot_remember_me", SAVED_USER = "buildot_saved_username";
+
+	function store(fn) { try { return fn(window.localStorage); } catch (e) { return null; } }
+
+	// The section the user is acting in. The forgot modal sits on top of the login
+	// form, so both are visible while it is open; the hash says which one is active.
+	function activeSection() {
+		var hash = window.location.hash;
+		if (hash === "#forgot") return $("section.for-forgot");
+		var $s = $("section:visible").not(".for-forgot");
+		return $s.length ? $s.first() : $("section.for-login");
+	}
+
+	function showAlert($sec, message, kind) {
+		if ($sec.hasClass("for-forgot")) {
+			$sec.find(".bo-modal-msg").removeClass("show");
+			if (message) $sec.find(".bo-modal-msg." + (kind === "ok" ? "ok" : "error")).text(message).addClass("show");
+			return;
+		}
+		var $a = $sec.find(".bo-alert").first();
+		if (!$a.length) return;
+		$a.removeClass("show error ok");
+		if (message) {
+			$a.find(".bo-alert-msg").html(message);
+			$a.addClass("show " + (kind || "error"));
+		}
+	}
+
+	function setBusy($btn, busy) {
+		if (!$btn.length) return;
+		$btn.prop("disabled", !!busy).toggleClass("busy", !!busy);
+		if ($btn.hasClass("btn-login") && $btn.hasClass("bo-submit")) {
+			var $label = $btn.find(".bo-submit-label");
+			if (busy) {
+				if (!$btn.data("bo-label")) $btn.data("bo-label", $label.text());
+				$label.text("Authenticating...");
+			} else if ($btn.data("bo-label")) {
+				$label.text($btn.data("bo-label"));
+			}
+		}
+	}
+
+	login.set_status = function (message, color) {
+		var $sec = activeSection();
+		var $btn = $sec.find(".btn-primary").first();
+		var styled = $btn.hasClass("bo-submit") || $btn.hasClass("bo-btn-send");
+
+		if (color === "blue" && message === T.verifying) {
+			showAlert($sec, "");
+			if (styled) setBusy($btn, true); else $btn.text(message);
+			return;
+		}
+		if (color === "red") {
+			if (styled) setBusy($btn, false); else $btn.text({{ _("Verify") | tojson }});
+			showAlert($sec, message, "error");
+			return;
+		}
+		if ($sec.hasClass("for-forgot") && message === T.emailed) {
+			setBusy($btn, false);
+			showAlert($sec, "If this account exists, a reset link has been sent.", "ok");
+			$btn.prop("disabled", true).find(".bo-send-label").text("Sent");
+			$("#forgot_email").prop("disabled", true);
+			return;
+		}
+		if (styled) {
+			// "Success" while the page switches to the desk: keep the button busy.
+			if (color === "green") return;
+			setBusy($btn, false);
+			if (color === "blue") showAlert($sec, message, "ok");
+			return;
+		}
+		$btn.text(message);
+		if (color === "blue" || color === "green") showAlert($sec, "");
+	};
+
+	// Forgot password opens as a modal over the sign-in form instead of replacing it.
+	login.forgot = function () {
+		login.reset_sections();
+		$("section.for-login").toggle(true);
+		var $sec = $("section.for-forgot");
+		$sec.find(".bo-modal-msg").removeClass("show");
+		$sec.find(".btn-forgot").prop("disabled", false).removeClass("busy").find(".bo-send-label").text("Send Reset Link");
+		$("#forgot_email").prop("disabled", false).val($("#login_email").val() || "");
+		$sec.toggle(true);
+		setTimeout(function () { $("#forgot_email").trigger("focus"); }, 50);
+	};
+
+	// A request that fails without an HTTP status (offline) must not leave the button spinning.
+	$(document).ajaxComplete(function () {
+		setTimeout(function () {
+			$(".bo-submit.busy, .bo-btn-send.busy").each(function () {
+				if (!$(this).closest("body").length) return;
+				setBusy($(this), false);
+			});
+		}, 1200);
+	});
+
+	$(function () {
+		var $user = $("#login_email"), $remember = $("#bo_remember");
+
+		// Remember me: keep the username on this device (the password is never stored).
+		var remember = store(function (s) { return s.getItem(REMEMBER) === "true"; });
+		$remember.prop("checked", !!remember);
+		$(".bo-remember").toggleClass("on", !!remember);
+		if (remember) {
+			var saved = store(function (s) { return s.getItem(SAVED_USER); });
+			if (saved && !$user.val()) { $user.val(saved); $("#login_password").trigger("focus"); }
+		}
+		$remember.on("change", function () {
+			var on = this.checked;
+			$(".bo-remember").toggleClass("on", on);
+			store(function (s) { s.setItem(REMEMBER, String(on)); if (!on) s.removeItem(SAVED_USER); });
+		});
+		$(".form-login").on("submit", function () {
+			if ($remember.prop("checked")) {
+				var v = ($user.val() || "").trim();
+				store(function (s) { s.setItem(SAVED_USER, v); });
+			}
+		});
+
+		// Show / hide password.
+		$(".bo-eye").on("click", function () {
+			var $pw = $("#login_password"), show = $pw.attr("type") === "password";
+			$pw.attr("type", show ? "text" : "password");
+			$(this).toggleClass("on", show).attr("aria-label", show ? "Hide password" : "Show password")
+				.find("use").attr("href", show ? "#bo-eye-off" : "#bo-eye");
+		});
+
+		// Clicking the dimmed backdrop closes the forgot-password modal.
+		$("[data-bo-close]").on("click", function (e) {
+			if (e.target === this) window.location.hash = "login";
+		});
+		$(document).on("keydown", function (e) {
+			if (e.key === "Escape" && window.location.hash === "#forgot") window.location.hash = "login";
+		});
+
+		// Left panel: the Sense → Learn steps and the module strip take turns lighting up.
+		var steps = $("#boSteps .bo-step").toArray(), links = $("#boSteps .bo-step-line").toArray(), step = 0;
+		function paintSteps() {
+			steps.forEach(function (el, n) {
+				el.classList.toggle("on", n === step);
+				el.classList.toggle("done", n < step);
+			});
+			links.forEach(function (el, n) { el.classList.toggle("done", n < step); });
+		}
+		setInterval(function () { step = (step + 1) % steps.length; paintSteps(); }, 2200);
+
+		var mods = $("#boModules .bo-mod").toArray(), mod = 0;
+		function paintModules() {
+			var prev = (mod - 1 + mods.length) % mods.length;
+			mods.forEach(function (el, n) {
+				el.classList.toggle("on", n === mod);
+				el.classList.toggle("lit", n === mod || n === prev);
+			});
+		}
+		paintModules();
+		setInterval(function () { mod = (mod + 1) % mods.length; paintModules(); }, 1800);
+	});
+
+	login.route();
+})();
+</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}
