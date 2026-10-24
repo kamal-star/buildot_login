@@ -1,7 +1,7 @@
 app_name = "buildot_login"
-app_title = "BuildOT Login"
+app_title = "MachineSens ERP Login"
 app_publisher = "MachineSens IoT"
-app_description = "BuildOT One login page for Frappe / ERPNext"
+app_description = "MachineSens ERP login page for Frappe / ERPNext"
 app_email = "info@machinesensiot.com"
 app_license = "mit"
 

@@ -3,7 +3,7 @@ name = "buildot_login"
 authors = [
     { name = "MachineSens IoT", email = "info@machinesensiot.com" }
 ]
-description = "BuildOT One login page for Frappe / ERPNext"
+description = "MachineSens ERP login page for Frappe / ERPNext"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]

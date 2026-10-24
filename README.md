@@ -1,14 +1,23 @@
-## BuildOT Login
+## MachineSens ERP Login
 
-Replaces the Frappe / ERPNext login page (`/login`) with the **BuildOT One** sign-in
-screen (https://buildot.machinesensiot.ai). Nothing else in the system changes.
+Replaces the Frappe / ERPNext login page (`/login`) with a custom **MachineSens ERP**
+sign-in screen. Nothing else in the system changes.
 
+- A midnight-indigo, animated two-panel design. On wide screens the left side shows an
+  animated ERP story:
+  - a live operations card with its chart drawing itself;
+  - activity notifications sliding in;
+  - module chips linked to the card by moving data packets;
+  - a Quote → Order → Procure → Deliver → Invoice → Paid flow;
+  - a dock of the ERP modules.
+- The right side is a frosted sign-in card with an animated gradient border, a greeting
+  based on the visitor's clock, and Email / Password fields.
+- On phones and tablets only the sign-in card is shown.
 - Works on Frappe / ERPNext **v15** (tested against 15.121) and v16.
-- The page is only a new look: signing in is still done by Frappe's own `login.js`, so
+- The page is only a new look. Signing in is still done by Frappe's own `login.js`, so
   password login, two-factor (OTP app / SMS / email), "Forgot password?", redirects
   (`?redirect-to=`), LDAP, social logins and email-link login keep working.
-- "Remember me" keeps the username on that browser only (never the password), as on
-  BuildOT.
+- "Remember me" keeps the email on that browser only, never the password.
 - Uninstalling the app brings the previous login page back.
 
 ### Install
@@ -23,19 +32,15 @@ bench --site <your-site> clear-website-cache
 sudo supervisorctl restart all        # production; use `bench restart` if that is how the server is run
 ```
 
-Without a git host, copy the `buildot_login` folder into `~/frappe-bench/apps/`, then:
+### Update (after a new version is pushed)
 
 ```bash
 cd ~/frappe-bench
-./env/bin/pip install -e apps/buildot_login
-grep -qx buildot_login sites/apps.txt || printf '\nbuildot_login' >> sites/apps.txt
-bench --site <your-site> install-app buildot_login
+bench update --apps buildot_login --pull      # or: cd apps/buildot_login && git pull
 bench build --app buildot_login
 bench --site <your-site> clear-cache && bench --site <your-site> clear-website-cache
 sudo supervisorctl restart all
 ```
-
-(`sites/apps.txt` usually has no trailing newline, hence the `printf '\n…'`.)
 
 ### If the old login still shows
 
@@ -61,13 +66,15 @@ bench --site <your-site> clear-cache && bench --site <your-site> clear-website-c
 
 | File | What it is |
 | --- | --- |
-| `buildot_login/www/login.html` | The page (layout + the small script that styles Frappe's login states) |
+| `buildot_login/www/login.html` | The page (layout and the small script that styles Frappe's login states) |
 | `buildot_login/www/login.py` | Reuses Frappe's own login context |
-| `buildot_login/public/css/buildot_login.css` | All styles and animations |
-| `buildot_login/public/images/buildot-symbol.png` | BuildOT logo |
+| `buildot_login/public/css/buildot_login.css` | All styles and animations (colours are CSS variables at the top) |
+| `buildot_login/templates/includes/ms_icons.html` | Icons ([Lucide](https://lucide.dev), ISC licence) |
+| `buildot_login/public/images/machinesens-symbol.png` | MachineSens logo mark |
 
-Texts (headline, "Welcome back", badges, footer) are plain text in `login.html` and can
-be edited there. After editing, run `bench build --app buildot_login` and clear the cache.
+Texts (headline, module names, notifications, footer) are plain text in `login.html`.
+The app name in "Sign in to your … ERP workspace" comes from **Website Settings → App
+Name**. After editing, run `bench build --app buildot_login` and clear the cache.
 
 #### License
 

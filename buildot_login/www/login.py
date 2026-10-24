@@ -1,4 +1,4 @@
-# Controller for the BuildOT login page. It reuses Frappe's own login context
+# Controller for the MachineSens ERP login page. It reuses Frappe's own login context
 # unchanged, so redirects for logged-in users, social logins, LDAP, email-link
 # login and the sign-up setting all behave exactly as on the standard page.
 
@@ -11,6 +11,5 @@ no_cache = 1
 
 def get_context(context):
 	context = frappe_login_context(context)
-	context.title = "BuildOT One"
 	context.bo_version = buildot_login.__version__
 	return context
