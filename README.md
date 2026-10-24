@@ -15,7 +15,7 @@ screen (https://buildot.machinesensiot.ai). Nothing else in the system changes.
 
 ```bash
 cd ~/frappe-bench
-bench get-app https://<your-git-host>/buildot_login.git   # or copy the folder into apps/ (see below)
+bench get-app https://github.com/kamal-star/buildot_login
 bench --site <your-site> install-app buildot_login
 bench build --app buildot_login
 bench --site <your-site> clear-cache
