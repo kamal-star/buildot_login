@@ -29,17 +29,17 @@
 
 {%- set flow = ["Quote", "Order", "Procure", "Deliver", "Invoice", "Paid"] -%}
 {%- set modules = [
-	("shopping-cart", "Sales", "#818CF8"), ("truck", "Buying", "#38BDF8"),
-	("package", "Stock", "#FBBF24"), ("folder-kanban", "Projects", "#C084FC"),
-	("landmark", "Accounts", "#34D399"), ("users", "HR", "#F472B6"),
-	("factory", "Manufacturing", "#FB923C")] -%}
+	("shopping-cart", "Sales", "#5EC1AC"), ("truck", "Buying", "#5EC1AC"),
+	("package", "Stock", "#5EC1AC"), ("folder-kanban", "Projects", "#7DEBD9"),
+	("landmark", "Accounts", "#7DEBD9"), ("users", "HR", "#3FA28C"),
+	("factory", "Manufacturing", "#45B099")] -%}
 {%- set feed = [
-	("shopping-cart", "Sales Order confirmed", "Customer PO received", "#818CF8"),
-	("package", "Stock received", "Goods receipt posted", "#FBBF24"),
-	("receipt", "Invoice submitted", "Sent to customer", "#C084FC"),
-	("wallet", "Payment received", "Ledger updated automatically", "#34D399"),
-	("truck", "Delivery dispatched", "Delivery note created", "#38BDF8"),
-	("folder-kanban", "Milestone reached", "Project stage completed", "#F472B6")] -%}
+	("shopping-cart", "Sales Order confirmed", "Customer PO received", "#5EC1AC"),
+	("package", "Stock received", "Goods receipt posted", "#5EC1AC"),
+	("receipt", "Invoice submitted", "Sent to customer", "#7DEBD9"),
+	("wallet", "Payment received", "Ledger updated automatically", "#7DEBD9"),
+	("truck", "Delivery dispatched", "Delivery note created", "#5EC1AC"),
+	("folder-kanban", "Milestone reached", "Project stage completed", "#3FA28C")] -%}
 {%- set logo_url = "/assets/buildot_login/images/machinesens-symbol.png" -%}
 
 <div id="ms" class="ms">
@@ -65,9 +65,9 @@
 			<svg class="ms-links" viewBox="0 0 560 320" preserveAspectRatio="none">
 				<defs>
 					<linearGradient id="msLink" x1="0" y1="0" x2="1" y2="0">
-						<stop offset="0" stop-color="#818CF8" stop-opacity=".15"/>
-						<stop offset=".5" stop-color="#A78BFA" stop-opacity=".7"/>
-						<stop offset="1" stop-color="#F472B6" stop-opacity=".15"/>
+						<stop offset="0" stop-color="#5EC1AC" stop-opacity=".15"/>
+						<stop offset=".5" stop-color="#45B099" stop-opacity=".7"/>
+						<stop offset="1" stop-color="#3FA28C" stop-opacity=".15"/>
 					</linearGradient>
 				</defs>
 				<path id="msP1" d="M92 88 C 118 88, 108 140, 132 142"/>
@@ -92,13 +92,13 @@
 				<svg class="ms-chart" viewBox="0 0 300 92" preserveAspectRatio="none">
 					<defs>
 						<linearGradient id="msArea" x1="0" y1="0" x2="0" y2="1">
-							<stop offset="0" stop-color="#8B5CF6" stop-opacity=".45"/>
-							<stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
+							<stop offset="0" stop-color="#45B099" stop-opacity=".45"/>
+							<stop offset="1" stop-color="#45B099" stop-opacity="0"/>
 						</linearGradient>
 						<linearGradient id="msLine" x1="0" y1="0" x2="1" y2="0">
-							<stop offset="0" stop-color="#818CF8"/>
-							<stop offset=".6" stop-color="#C084FC"/>
-							<stop offset="1" stop-color="#F472B6"/>
+							<stop offset="0" stop-color="#5EC1AC"/>
+							<stop offset=".6" stop-color="#7DEBD9"/>
+							<stop offset="1" stop-color="#3FA28C"/>
 						</linearGradient>
 					</defs>
 					{%- for b in [34, 48, 40, 58, 52, 70, 64, 82] %}
